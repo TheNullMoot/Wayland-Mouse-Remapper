@@ -48,27 +48,27 @@ void readConfig(FILE *configurationFileData)
         }
 
         //check to see if line contains layer_shift_toggle button
-        if (strcmp(fromKey, "LAYER_SHIFT_TOGGLE") == 0)
+        if (strcmp(toKey, "LAYER_SHIFT_TOGGLE") == 0)
         {
             //dummy vars
             int type;
             int value;
 
             //set mouse toggle button to from key
-            LAYER_TOGGLE_BUTTON = mouseKey(toKey, &type, &value);
+            LAYER_TOGGLE_BUTTON = parseFromKey(fromKey, &type, &value);
 
             //go to next while loop run
             continue;
         }
         //check to see if line contains layer_shift_hold button
-        if (strcmp(fromKey, "LAYER_SHIFT_HOLD") == 0)
+        if (strcmp(toKey, "LAYER_SHIFT_HOLD") == 0)
         {
             //dummy vars
             int type;
             int value;
 
             //set mouse hold button to from key
-            LAYER_HOLD_BUTTON = mouseKey(toKey, &type, &value);
+            LAYER_HOLD_BUTTON = parseFromKey(fromKey, &type, &value);
 
             //go to next while loop run
             continue;
