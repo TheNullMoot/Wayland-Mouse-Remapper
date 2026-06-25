@@ -1,6 +1,6 @@
 #
-# Author: TheJewGamer
-# Last Update: 3/8/2026
+# Author: TheNullMoot
+# Last Update: 6/24/2026
 #
 
 #!/bin/bash
@@ -20,6 +20,7 @@ UDEV_RULES_PATH="/etc/udev/rules.d/99-wayland-mouse-remapper.rules"
 USER_ID=$(id -u)
 KWIN_SCRIPT_DIR="$HOME/.local/share/kwin/scripts"
 KWIN_SCRIPT_NAME="wayland-mouse-remapper-window-notifier"
+addedToInputGroup=false
 
 # -----------------------------------------------
 # helper functions
@@ -33,7 +34,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # Welcome message
 echo "==============================="
 echo " Wayland Mouse Remapper Setup"
-echo " By      TheJewGamer"
+echo " By      TheNullMoot"
 echo "==============================="
 echo ""
 
@@ -42,12 +43,13 @@ echo "Welcome to the Wayland Mouse Remapper setup script. This script will do th
 echo "1. Create the wayland-mouse-reampper binary file"
 echo "2. Copy the binary file to the install directory (/usr/local/bin/)"
 echo "3. Setup needed udev rules for the script if not already present"
-echo "4. Setup the configuration directory if not already present"
-echo "5. Create a default.config if not already present"
-echo "6. Create a settings.ini file if not already present"
-echo "7. Create the user systemd service if not already present"
-echo "8. Installs the KWIN script that is used to notify of windows changes if on KDE"
-echo "Please note this script will request your password to run as sudo."
+echo "4. Adds the current user to the input group so the udev rules can take effect"
+echo "5. Setup the configuration directory if not already present"
+echo "6. Create a default.config if not already present"
+echo "7. Create a settings.ini file if not already present"
+echo "8. Create the user systemd service if not already present"
+echo "9. Installs the KWIN script that is used to notify of windows changes if on KDE"
+echo "Please note this script will request your password to run as sudo and you may need to reboot before it takes a effect."
 read -rp "Proceed? (Y/n): " CONFIRM
 if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then
     log_info "Said no. Canceling setup"
@@ -175,9 +177,9 @@ else
 
     # create udev file
     sudo tee "$UDEV_RULES_PATH" > /dev/null << EOF
-KERNEL=="uinput", MODE="0660", TAG+="uaccess"
-SUBSYSTEM=="input", ATTRS{idVendor}=="$VENDOR_ID", ATTRS{idProduct}=="$PRODUCT_ID", MODE="0660", TAG+="uaccess"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="$VENDOR_ID", ATTRS{idProduct}=="$PRODUCT_ID", MODE="0660", TAG+="uaccess"
+KERNEL=="uinput", GROUP="input", MODE="0660"
+SUBSYSTEM=="input", ATTRS{idVendor}=="$VENDOR_ID", ATTRS{idProduct}=="$PRODUCT_ID", GROUP="input", MODE="0660"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="$VENDOR_ID", ATTRS{idProduct}=="$PRODUCT_ID", GROUP="input", MODE="0660"
 EOF
 
     # check to see if udev file was created correctly 
@@ -196,6 +198,32 @@ EOF
     log_info "Reloading udev rules"
     sudo udevadm control --reload-rules && sudo udevadm trigger
     log_info "udev rules reloaded"
+
+fi
+
+# new line
+echo ""
+
+# -----------------------------------------------
+# add to input group
+# -----------------------------------------------
+
+#feedback
+log_info "Trying to add current user to the input group"
+
+# check to see if in the input group already
+if groups $USER | grep -q '\binput\b'; then
+    #feedback
+    log_info "User already present in the input group."
+else
+    #feedback
+    log_info "Adding user to the input group"
+    
+    # add to group
+    sudo usermod -aG input $USER
+
+    #update var
+    addedToInputGroup=true
 
 fi
 
@@ -488,9 +516,17 @@ systemctl --user start wayland-mouse-remapper
 # done
 echo ""
 echo "==============================="
-echo -e "${GREEN} Setup complete${NC}"
+log_info "Setup complete"
 echo "==============================="
 echo ""
 echo "Config directory: $CONFIG_DIR"
 echo "Confirm program is running via: systemctl --user status wayland-mouse-remapper"
+
+#check to see if user was added to the input group
+if $addedToInputGroup; then
+    #feedback
+    log_warn "User account was added to input group. Please reboot before the script can take effect."
+fi
+
+#end
 echo ""

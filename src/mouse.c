@@ -1,6 +1,6 @@
 /* 
-Author: TheJewGamer
-Last Update: 3/11/2026
+Author: TheNullMoot
+Last Update: 6/23/2026
 */
 
 //header file
@@ -33,7 +33,9 @@ char* getMouseEventID(const char *physPath)
     while (fgets(currentLine, sizeof(currentLine), inputDevicesFile))
     {
         //check to see if current line contains physPath
-        if (strstr(currentLine, physPath))
+        char physMatch[256];
+        snprintf(physMatch, sizeof(physMatch), "%s\n", physPath); //add new line to end of string to for exact match. Otherwise can cause issues with grabbing the wrong device as input could match between devices
+        if (strstr(currentLine, physMatch))
         {
             //it did update var
             foundMouse = 1;

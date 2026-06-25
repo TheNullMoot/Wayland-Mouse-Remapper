@@ -5,8 +5,8 @@
         "Version": "1.0",
         "Id": "wayland-mouse-remapper-window-notifier",
         "License": "GPL-2.0-or-later",
-        "Website": "https://github.com/TheJewGamer/Wayland-Mouse-Remapper",
-        "Authors": [{"Name": "TheJewGamer"}]
+        "Website": "https://github.com/TheNullMoot/Wayland-Mouse-Remapper",
+        "Authors": [{"Name": "TheNullMoot"}]
     },
     "X-Plasma-API": "javascript",
     "X-Plasma-MainScript": "code/main.js",
